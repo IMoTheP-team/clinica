@@ -1,0 +1,14 @@
+{
+    "id": "aramislab/visualization_gltf",
+    "author": "Jacques-Yves Campion",
+    "version": "0.0.1",
+    "space_caps": "M",
+    "space_wd": "M",
+    "dependencies": [
+        {
+            "type": "package",
+            "name": "vtk",
+            "version": ""
+        }
+    ]
+}

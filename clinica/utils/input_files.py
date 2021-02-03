@@ -313,3 +313,111 @@ def pet_volume_normalized_suvr_pet(
         "needed_pipeline": "pet-volume",
     }
     return information
+
+""" Visualization """
+
+# T1w
+
+def t1w_freesurfer_mgh(
+    data,
+    space,
+    side,
+    fwhm=0,
+):
+    import os
+
+    if space == "fsaverage":
+        space_key_value = ".fsaverage.mgh"
+        space_description = "fsaverage space"
+    else:
+        space_key_value = ""
+        space_description = "native space"
+
+    if fwhm:
+        fwhm_key_value = f".fwhm{fwhm}"
+        fwhm_description = f"with {fwhm}mm smoothing"
+    else:
+        fwhm_key_value = f""
+        fwhm_description = f"with no smoothing"
+
+
+
+    information = {
+        "pattern": os.path.join(
+            "t1",
+            "freesurfer_cross_sectional",
+            "sub-*_ses-*",
+            f"{side}h.{data}{fwhm_key_value}{space_key_value}",
+        ),
+        "description": (
+            f"{data} surface map in {space_description} (if fsaverage fwhm = {fwhm_description})"
+        ),
+        "needed_pipeline": "t1-freesurfer",
+    }
+    return information
+
+def t1w_freesurfer_surface(
+    space,
+    side
+):
+    import os
+
+    if space == "fsaverage":
+        path = os.path.join("$SUBJECTS_DIR", "fsaverage", "surf", f"{side}h.pial")
+        space_description = "Surface file of fsaverage space"
+    else:
+        path = os.path.join("t1", "freesurfer_cross_sectional", "sub-*_ses-*", "surf", f"{side}h.pial")
+        space_description = "Surface file of native space"
+
+
+
+    information = {
+        "pattern": path,
+        "description": (
+            f"{space_description}"
+        ),
+        "needed_pipeline": "t1-freesurfer",
+    }
+    return information
+
+# PET
+
+def pet_surface_suvr(
+    acq_label,
+    space,
+    side,
+    use_pvc_data,
+    suvr_reference_region,
+    fwhm=0,
+):
+    import os
+
+    if use_pvc_data:
+        pvc_key_value = "_pvc-iy"
+        pvc_description = "using RBV method for PVC"
+    else:
+        pvc_key_value = ""
+        pvc_description = "without PVC"
+
+    if fwhm:
+        fwhm_key_value = f"_fwhm-{fwhm}"
+        fwhm_description = f"with {fwhm}mm smoothing"
+    else:
+        fwhm_key_value = f""
+        fwhm_description = f"with no smoothing"
+
+    suvr_key_value = f"_suvr-{suvr_reference_region}"
+
+    information = {
+        "pattern": os.path.join(
+            "pet",
+            "surface",
+            f"*_acq-{acq_label}_pet"
+            f"_space-{space}{pvc_key_value}{suvr_key_value}_hemi-{side}h_{fwhm_key_value}_projection.nii*",
+        ),
+        "description": (
+            f"SUVR surface map (using {suvr_reference_region} region) of {acq_label}-PET {pvc_description} in {space} space (if fsaverage fwhm = {fwhm_description})"
+        ),
+        "needed_pipeline": "pet-surface",
+    }
+    return information
