@@ -60,16 +60,16 @@ def freesurfer2ply_side(overlay_file, surface_file):
     df_color = pd.DataFrame(overlay_color)
 
     df = pd.concat([df_coords, df_color], axis=1)
-    df.to_csv(str(overlay_file).replace(".mgh", "") + ".ply", sep=" ", mode="a")
+    df.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), sep=" ", mode="a")
 
     # FACES
 
     faces = surface.faces - 1
     faces = np.insert(faces, 0, np.repeat(3, surface.faces.shape[0]), axis=1)
     df_faces = pd.DataFrame(faces)
-    df_faces.to_csv(str(overlay_file).replace(".mgh", "") + ".ply", sep=" ", mode="a")
+    df_faces.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), sep=" ", mode="a")
 
-    return str(overlay_file).replace(".mgh", "") + ".ply"
+    return os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply")
 
 
 def ply2gltf_full(ply_file_lh, ply_file_rh):
@@ -81,6 +81,9 @@ def ply2gltf_full(ply_file_lh, ply_file_rh):
 
 def ply2gltf_side(ply_file):
     import vtk
+    import os
+
+    basedir = os.getcwd()
 
     reader = vtk.vtkPLYReader()
     reader.SetFileName(ply_file)
@@ -101,9 +104,9 @@ def ply2gltf_side(ply_file):
 
     # Export the GLTF
     writer = vtk.vtkGLTFExporter()
-    writer.SetFileName(str(ply_file.replace(".ply", ".gltf")))
+    writer.SetFileName(os.path.join(basedir, str(ply_file.replace(".ply", ".gltf"))))
     writer.InlineDataOn()
     writer.SetRenderWindow(renWin)
     writer.Write()
 
-    return str(ply_file.replace(".ply", ".gltf"))
+    return os.path.join(basedir, str(ply_file.replace(".ply", ".gltf")))

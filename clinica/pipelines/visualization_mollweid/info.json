@@ -1,0 +1,9 @@
+{
+    "id": "aramislab/visualization_mollweid",
+    "author": "Jacques-Yves Campion",
+    "version": "0.0.1",
+    "space_caps": "M",
+    "space_wd": "M",
+    "dependencies": [
+    ]
+}

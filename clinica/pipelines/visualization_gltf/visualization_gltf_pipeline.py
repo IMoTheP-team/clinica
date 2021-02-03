@@ -4,10 +4,10 @@ import clinica.pipelines.engine as cpe
 
 
 class VisualizationGltf(cpe.Pipeline):
-    """PetSurface - Surface-based processing of PET images.
+    """VisualizationGltf - Visualization by converting in GLTF file.
 
     Returns:
-        A clinica pipeline object containing the PetSurface pipeline.
+        A clinica pipeline object containing the VisualizationGltf pipeline.
     """
 
     def check_pipeline_parameters(self):
@@ -31,7 +31,7 @@ class VisualizationGltf(cpe.Pipeline):
 
     def get_output_fields(self):
         """Specify the list of possible outputs of this pipeline."""
-        return ['gltf']
+        return ['output_file_gltf_lh', 'output_file_gltf_rh']
 
     def build_input_node(self):
         """Build and connect an input node to the pipeline."""
@@ -149,8 +149,6 @@ class VisualizationGltf(cpe.Pipeline):
         write_node.inputs.base_directory = self.caps_directory
         write_node.inputs.parameterization = False
 
-        # Find container path from filename
-        # ----------------------
         container_path = npe.Node(
             nutil.Function(
                 input_names=['bids_or_caps_filename'],
@@ -198,8 +196,7 @@ class VisualizationGltf(cpe.Pipeline):
             )
         )
 
-        # Extract slices node (options: 3 directions, mode)
-        # ----------------------
+
         ply2gltf_full = npe.MapNode(
             name='ply2gltf',
             iterfield=['output_file_ply_lh', 'output_file_ply_rh'],
