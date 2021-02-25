@@ -1117,8 +1117,8 @@ def get_wf(subject_id,
                 (convert_gtmseg, labelconversion, [('out_file', 'gtmsegfile')]),
                 (labelconversion, merge_volume, [('list_of_regions', 'in_files')]),
 
-                (merge_volume, pvc, [('merged_file', 'mask_file')]),
-                (pons_normalization, pvc, [('suvr', 'in_file')]),
+                #(merge_volume, pvc, [('merged_file', 'mask_file')]),
+                #(pons_normalization, pvc, [('suvr', 'in_file')]),
 
                 (reformat_surface_name, mris_exp, [('out', 'in_surface')]),
                 (mris_exp, extract_mid_surface, [('out_surface', 'in_surfaces')]),
@@ -1127,7 +1127,7 @@ def get_wf(subject_id,
                 (tkregister, surf_conversion, [('reg_file', 'reg_file')]),
                 (gtmsegmentation, surf_conversion, [('gtmseg_file', 'gtmsegfile')]),
 
-                (pvc, vol_on_surf, [('out_file', 'volume')]),
+                (pons_normalization, vol_on_surf, [('suvr', 'volume')]), #(pvc, vol_on_surf, [('out_file', 'volume')]),
                 (surf_conversion, vol_on_surf, [('tval', 'surface')]),
                 (gtmsegmentation, vol_on_surf, [('gtmseg_file', 'gtmsegfile')]),
 

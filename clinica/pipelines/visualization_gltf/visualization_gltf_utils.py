@@ -14,62 +14,65 @@ def freesurfer2ply_side(overlay_file, surface_file):
     import matplotlib as mpl
     import matplotlib.cm as cm
     import numpy as np
+    from nibabel.freesurfer.mghformat import load
 
-    overlay = nib.freesurfer.io.read_geometry(overlay_file)
-    surface = nib.freesurfer.io.read_morph_data(surface_file)
+    overlay = load(overlay_file).get_fdata().flatten()
+    coords, faces = nib.freesurfer.io.read_geometry(surface_file)
 
-    num_verts = surface.coords.shape[0]
-    num_faces = surface.faces.shape[0]
+    num_verts = coords.shape[0]
+    num_faces = faces.shape[0]
 
     # TODO : check.verts.faces
 
     # HEADER SETTINGS
 
     basedir = os.getcwd()
-    with open(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), 'a') as file:
-        array = ["ply", "format ascii 1.0"]
+    array = ["ply", "format ascii 1.0"]
 
-        array.append(f"element vertex {num_verts}")
+    array.append(f"element vertex {num_verts}")
 
-        array.append("property float x")
-        array.append("property float y")
-        array.append("property float z")
+    array.append("property float x")
+    array.append("property float y")
+    array.append("property float z")
 
-        array.append("property uchar red")
-        array.append("property uchar green")
-        array.append("property uchar blue")
-        array.append("property uchar alpha")
+    array.append("property uchar red")
+    array.append("property uchar green")
+    array.append("property uchar blue")
+    array.append("property uchar alpha")
 
-        array.append(f"element vertex {num_faces}")
-        array.append("property list uchar int vertex_indices")
+    array.append(f"element face {num_faces}")
+    array.append("property list uchar int vertex_indices")
 
-        array.append("end_header")
+    array.append("end_header")
 
-        file.writelines(array)
+    with open(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), 'w') as file:
+        file.writelines("%s\n" % line for line in array)
 
     # COORDS VERTEX + COLORS
 
-    df_coords = pd.DataFrame(surface.coords)
+    df_coords = pd.DataFrame(coords)
+    df_coords = df_coords - df_coords.mean()
 
     norm = mpl.colors.Normalize(vmin=overlay.min(), vmax=overlay.max())
     cmap = cm.hot
 
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
-    overlay_color = m.to_rgba(overlay)
+    overlay_color = m.to_rgba(overlay, bytes=True)
 
     df_color = pd.DataFrame(overlay_color)
 
     df = pd.concat([df_coords, df_color], axis=1)
-    df.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), sep=" ", mode="a")
+    df.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), sep=" ", mode="a", header=False, index=False)
+    print(len(df.index))
 
     # FACES
-
-    faces = surface.faces - 1
-    faces = np.insert(faces, 0, np.repeat(3, surface.faces.shape[0]), axis=1)
+    faces = np.insert(faces, 0, np.repeat(3, faces.shape[0]), axis=1)
     df_faces = pd.DataFrame(faces)
-    df_faces.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply"), sep=" ", mode="a")
+    df_faces.to_csv(os.path.join(basedir, str(overlay_file).replace(".mgh", ".ply")), sep=" ", mode="a", header=False, index=False)
+    print(len(df_faces.index))
 
-    return os.path.join(basedir, str(overlay_file).replace(".mgh", "") + ".ply")
+
+    return os.path.join(basedir, str(overlay_file).replace(".mgh", ".ply"))
 
 
 def ply2gltf_full(ply_file_lh, ply_file_rh):
